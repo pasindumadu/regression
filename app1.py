@@ -1,31 +1,29 @@
 import numpy as np
+import pandas as pd
 import streamlit as st
-import plotly.graph_objects as go
-import time
+import altair as alt
 
-# Enable wide mode
-st.set_page_config(layout="wide", page_title="Interactive Linear Regression", page_icon="📈")
+# Page Configuration
+st.set_page_config(
+    layout="wide", page_title="Interactive Linear Regression", page_icon="📈"
+)
 
-# Custom CSS for Responsive Styling
+# Dark Theme Styling
 custom_css = '''
 <style>
 body {
-    background-color: #f5f5f5;
-    font-family: "Arial", sans-serif;
+    background-color: #121212;
+    color: #FFFFFF;
 }
-h1 {
-    color: #4CAF50;
-    text-align: center;
+h1, h2, h3 {
+    color: #FFFFFF;
 }
 .stButton > button {
-    background-color: #4CAF50;
+    background-color: #1E88E5;
     color: white;
-    border-radius: 5px;
-    padding: 5px 20px;
-    font-size: 16px;
 }
 .stButton > button:hover {
-    background-color: #45a049;
+    background-color: #1565C0;
 }
 </style>
 '''
@@ -37,141 +35,152 @@ if "slope" not in st.session_state:
 if "intercept" not in st.session_state:
     st.session_state.intercept = 1.0
 
-# Streamlit App Title
-st.title("📈 Interactive Linear Regression App")
+# Adjust layout for mobile devices
+is_mobile = st.sidebar.checkbox("Mobile View", value=False)
 
-# Introduction with divider
-st.write("### Welcome to the Linear Regression Visualizer")
-st.markdown("---")
+# Tabs for interactive visualization and theory
+tab1, tab2 = st.tabs(["📊 Interactive Regression", "📚 What is Linear Regression?"])
 
-st.write("""
-Linear regression is a fundamental technique in data analysis and machine learning.
-This app lets you interactively adjust the parameters of a regression line, visualize the impact on the total error, 
-and compare your adjustments with the best-fit line computed automatically.
-""")
-
-# Add a section divider
-st.markdown("---")
-
-# Generate data
-np.random.seed(42)
-x = np.linspace(0, 10, 50)
-y = 3 * x + 5 + np.random.normal(0, 2, size=x.shape)
-
-# Customizable line using number inputs
-st.write("### Adjust Slope and Intercept")
-slope = st.number_input(
-    "Slope", value=st.session_state.slope, step=0.1, min_value=-10.0, max_value=10.0
-)
-intercept = st.number_input(
-    "Intercept", value=st.session_state.intercept, step=0.1, min_value=-20.0, max_value=20.0
-)
-
-# Update session state with current values
-st.session_state.slope = slope
-st.session_state.intercept = intercept
-
-# Regression line based on user input
-y_pred = slope * x + intercept
-
-# Total error calculation
-total_error = np.sum((y - y_pred) ** 2)
-
-# Add progress bar while processing
-with st.spinner("Processing your inputs..."):
-    time.sleep(0.5)
-st.success("Done!")
-
-# Plotly figure for the main plot
-fig = go.Figure()
-
-# Scatter plot of data points
-fig.add_trace(go.Scatter(x=x, y=y, mode='markers', name='Data Points'))
-
-# Line for user-adjusted regression
-fig.add_trace(
-    go.Scatter(
-        x=x,
-        y=y_pred,
-        mode='lines',
-        line=dict(color='red', width=3),
-        name=f"Your Line (y = {slope:.2f}x + {intercept:.2f})"
-    )
-)
-
-# Best-fit line
-best_slope, best_intercept = np.polyfit(x, y, 1)
-fig.add_trace(
-    go.Scatter(
-        x=x,
-        y=best_slope * x + best_intercept,
-        mode='lines',
-        line=dict(color='purple', dash='dash'),
-        name=f"Best Fit Line (y = {best_slope:.2f}x + {best_intercept:.2f})"
-    )
-)
-
-# Layout updates for responsiveness
-fig.update_layout(
-    title="Interactive Regression Plot",
-    xaxis_title="X",
-    yaxis_title="Y",
-    showlegend=True,
-    autosize=True,
-    height=500,  # Optimized height
-)
-
-# Show Plotly chart with a unique key
-st.plotly_chart(fig, use_container_width=True)
-
-# Add section for Total Error
-st.markdown("---")
-st.write("### Total Error")
-st.metric(label="Total Error", value=f"{total_error:.2f}", delta="Lower is better")
-
-# Total error plot
-fig_error = go.Figure()
-
-# Total error as a single horizontal bar
-fig_error.add_trace(
-    go.Bar(
-        x=[total_error],  # Bar length corresponds to the error value
-        y=["Total Error"],  # Label for the bar
-        orientation='h',  # Horizontal orientation
-        marker=dict(color='green')  # Bar color
-    )
-)
-
-# Layout update for error plot
-fig_error.update_layout(
-    title="Total Error Bar Chart",
-    xaxis_title="Error Value",
-    yaxis_title="",
-    autosize=True,
-    height=300,  # Optimized height
-    xaxis=dict(range=[0, max(total_error + 50, total_error * 1.2)])  # Dynamic range
-)
-
-# Show the error plot with a unique key
-st.plotly_chart(fig_error, use_container_width=True)
-
-# Tabs for organization
-tab1, tab2 = st.tabs(["📊 Interactive Plot", "📚 About Linear Regression"])
 with tab1:
-    st.write("### Interactive Plot Section")
-    st.plotly_chart(fig, use_container_width=True)
+    # App Title
+    st.title("📈 Interactive Linear Regression App")
+    st.subheader("Explore Regression Models and Minimize Error")
+
+    # Introduction Section
+    st.markdown("""
+    This app lets you:
+    - Adjust the slope (**m**) and intercept (**b**) of a regression line.
+    - Visualize your adjusted line and compare it to the optimal best-fit line.
+    - View and minimize the **total error** dynamically.
+    """)
+    st.markdown("---")
+
+    # Data Generation
+    np.random.seed(42)
+    x = np.linspace(0, 10, 50)
+    y = 3 * x + 5 + np.random.normal(0, 2, size=x.shape)
+
+    # Input Controls for Slope and Intercept
+    st.markdown("### 🔧 Adjust Parameters")
+    
+    if is_mobile:
+        slope = st.number_input(
+            "Slope (m)", value=st.session_state.slope, step=0.1, min_value=-10.0, max_value=10.0, key="mobile_slope"
+        )
+        intercept = st.number_input(
+            "Intercept (b)", value=st.session_state.intercept, step=0.1, min_value=-20.0, max_value=20.0, key="mobile_intercept"
+        )
+    else:
+        col1, col2 = st.columns(2)
+        with col1:
+            slope = st.number_input(
+                "Slope (m)", value=st.session_state.slope, step=0.1, min_value=-10.0, max_value=10.0
+            )
+        with col2:
+            intercept = st.number_input(
+                "Intercept (b)", value=st.session_state.intercept, step=0.1, min_value=-20.0, max_value=20.0
+            )
+
+    # Update Session State
+    st.session_state.slope = slope
+    st.session_state.intercept = intercept
+
+    # Regression Line Calculations
+    y_pred = slope * x + intercept
+    best_slope, best_intercept = np.polyfit(x, y, 1)
+    y_best_fit = best_slope * x + best_intercept
+    total_error = np.sum((y - y_pred) ** 2)
+
+    # Scatter Plot with Regression Lines
+    data = pd.DataFrame({"X": x, "Y": y, "Y_pred": y_pred, "Y_best_fit": y_best_fit})
+    scatter = alt.Chart(data).mark_circle(size=70).encode(
+        x="X", y="Y", tooltip=["X", "Y"]
+    ).properties(width=800, height=400)
+
+    user_line = alt.Chart(data).mark_line(color="red", strokeWidth=3).encode(
+        x="X", y="Y_pred", tooltip=["X", "Y_pred"]
+    )
+
+    best_fit_line = alt.Chart(data).mark_line(color="purple", strokeDash=[5, 5], strokeWidth=2).encode(
+        x="X", y="Y_best_fit", tooltip=["X", "Y_best_fit"]
+    )
+
+    chart = scatter + user_line + best_fit_line
+    chart = chart.properties(
+        title="📊 Regression Line Visualization",
+    ).configure_title(
+        fontSize=18, anchor="middle", color="lightgreen"
+    )
+
+    # Display Main Chart
+    st.altair_chart(chart, use_container_width=True)
+
+    # Dynamic Horizontal Total Error Bar Chart
+    st.markdown("---")
+    st.markdown("### 🔢 Total Error")
+
+    error_data = pd.DataFrame({
+        "Error Type": ["Current Error"],
+        "Error Value": [total_error]
+    })
+    error_chart = alt.Chart(error_data).mark_bar(size=30).encode(
+        x=alt.X("Error Value", axis=alt.Axis(title="Error Magnitude")),
+        y=alt.Y("Error Type", axis=None),
+        color=alt.condition(
+            alt.datum["Error Value"] < 100,
+            alt.value("green"),  # Green for low error
+            alt.value("red")    # Red for high error
+        ),
+        tooltip=["Error Value"]
+    ).properties(width=600, height=100)
+
+    # Adjust columns for mobile view
+    if is_mobile:
+        st.altair_chart(error_chart, use_container_width=True)
+        st.write(f"### **{total_error:.2f}**")
+    else:
+        error_col1, error_col2 = st.columns([4, 1])
+        with error_col1:
+            st.altair_chart(error_chart, use_container_width=True)
+        with error_col2:
+            st.write(f"### **{total_error:.2f}**")
+
+    # Error Evaluation
+    if total_error < 50:
+        st.success("Great Fit! 🎉")
+    elif total_error < 100:
+        st.warning("Good Fit! Could Improve 🧐")
+    else:
+        st.error("High Error! 🚨 Try Adjusting.")
+
+    # Footer
+    st.markdown("""
+    ---
+    <footer style="text-align: center; font-size: 12px; color: gray;">
+        Developed by [Your Name](https://yourportfolio.com) | Powered by Streamlit
+    </footer>
+    """, unsafe_allow_html=True)
 
 with tab2:
-    st.write("### About Linear Regression")
+    st.write("### What is Linear Regression?")
     st.write("""
-    Linear regression is a method for modeling the relationship between an independent variable (X) and a dependent variable (Y) by fitting a straight line.
-    The equation for the line is:
-
+    Linear regression is a technique to model the relationship between two variables by fitting a straight line. 
+    The line is represented by the equation:
     **y = mx + b**
+    - **m**: Slope of the line
+    - **b**: Intercept of the line
 
-    where:
-    - **m** is the slope.
-    - **b** is the y-intercept.
+    The goal is to minimize the total error (sum of squared differences between predicted and actual values).
 
-    The total error measures how well the line fits the data and is minimized in the best-fit line.
+    In this app:
+    - Adjust the slope (**m**) and intercept (**b**) manually and see how well your line fits.
+    - Compare your adjustments to the **optimal best-fit line** computed automatically.
+    - Watch the **total error** change dynamically as you make adjustments.
     """)
+
+    st.markdown("---")
+    with st.expander("Need Help?"):
+        st.write("""
+        - Use the **Slope (m)** and **Intercept (b)** sliders to adjust the line.
+        - Observe how your line matches the data and how the error changes.
+        """)
