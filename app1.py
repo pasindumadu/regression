@@ -35,7 +35,6 @@ if "slope" not in st.session_state:
 if "intercept" not in st.session_state:
     st.session_state.intercept = 1.0
 
-
 # Tabs for interactive visualization and theory
 tab1, tab2 = st.tabs(["📊 Interactive Regression", "📚 What is Linear Regression?"])
 
@@ -60,24 +59,15 @@ with tab1:
 
     # Input Controls for Slope and Intercept
     st.markdown("### 🔧 Adjust Parameters")
-    
-    if is_mobile:
+    col1, col2 = st.columns(2)
+    with col1:
         slope = st.number_input(
-            "Slope (m)", value=st.session_state.slope, step=0.1, min_value=-10.0, max_value=10.0, key="mobile_slope"
+            "Slope (m)", value=st.session_state.slope, step=0.1, min_value=-10.0, max_value=10.0
         )
+    with col2:
         intercept = st.number_input(
-            "Intercept (b)", value=st.session_state.intercept, step=0.1, min_value=-20.0, max_value=20.0, key="mobile_intercept"
+            "Intercept (b)", value=st.session_state.intercept, step=0.1, min_value=-20.0, max_value=20.0
         )
-    else:
-        col1, col2 = st.columns(2)
-        with col1:
-            slope = st.number_input(
-                "Slope (m)", value=st.session_state.slope, step=0.1, min_value=-10.0, max_value=10.0
-            )
-        with col2:
-            intercept = st.number_input(
-                "Intercept (b)", value=st.session_state.intercept, step=0.1, min_value=-20.0, max_value=20.0
-            )
 
     # Update Session State
     st.session_state.slope = slope
@@ -132,11 +122,17 @@ with tab1:
         tooltip=["Error Value"]
     ).properties(width=600, height=100)
 
+    # Adjust columns for mobile view
+    error_col1, error_col2 = st.columns([4, 1])
+    with error_col1:
+        st.altair_chart(error_chart, use_container_width=True)
+    with error_col2:
+        st.write(f"### **{total_error:.2f}**")
 
     # Error Evaluation
     if total_error < 50:
         st.success("Great Fit! 🎉")
-    elif total_error < 200:
+    elif total_error < 100:
         st.warning("Good Fit! Could Improve 🧐")
     else:
         st.error("High Error! 🚨 Try Adjusting.")
@@ -145,7 +141,7 @@ with tab1:
     st.markdown("""
     ---
     <footer style="text-align: center; font-size: 12px; color: gray;">
-        Developed by Pasindu Madhuranga | Powered by Streamlit
+        Developed by [Your Name](https://yourportfolio.com) | Powered by Streamlit
     </footer>
     """, unsafe_allow_html=True)
 
