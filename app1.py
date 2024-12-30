@@ -148,7 +148,7 @@ with tab1:
     # Error Evaluation
     if total_error < 50:
         st.success("Great Fit! 🎉")
-    elif total_error < 100:
+    elif total_error < 200:
         st.warning("Good Fit! Could Improve 🧐")
     else:
         st.error("High Error! 🚨 Try Adjusting.")
@@ -157,7 +157,7 @@ with tab1:
     st.markdown("""
     ---
     <footer style="text-align: center; font-size: 12px; color: gray;">
-        Developed by [Your Name](https://yourportfolio.com) | Powered by Streamlit
+        Developed by Pasindu Madhuranga | Powered by Streamlit
     </footer>
     """, unsafe_allow_html=True)
 
