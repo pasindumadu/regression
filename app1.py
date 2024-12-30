@@ -3,15 +3,18 @@ import streamlit as st
 import plotly.graph_objects as go
 import time
 
-# Custom CSS for Themed Styling
+# Enable wide mode
+st.set_page_config(layout="wide", page_title="Interactive Linear Regression", page_icon="📈")
+
+# Custom CSS for Responsive Styling
 custom_css = '''
 <style>
 body {
-    background-color: #f5f5f5; /* Light gray background */
+    background-color: #f5f5f5;
     font-family: "Arial", sans-serif;
 }
 h1 {
-    color: #4CAF50; /* Green title */
+    color: #4CAF50;
     text-align: center;
 }
 .stButton > button {
@@ -22,7 +25,7 @@ h1 {
     font-size: 16px;
 }
 .stButton > button:hover {
-    background-color: #45a049; /* Hover effect */
+    background-color: #45a049;
 }
 </style>
 '''
@@ -76,7 +79,7 @@ total_error = np.sum((y - y_pred) ** 2)
 
 # Add progress bar while processing
 with st.spinner("Processing your inputs..."):
-    time.sleep(1)
+    time.sleep(0.5)
 st.success("Done!")
 
 # Plotly figure for the main plot
@@ -108,18 +111,18 @@ fig.add_trace(
     )
 )
 
-# Layout updates to enlarge the graph
+# Layout updates for responsiveness
 fig.update_layout(
     title="Interactive Regression Plot",
     xaxis_title="X",
     yaxis_title="Y",
     showlegend=True,
-    height=600,  # Increased height
-    width=900,   # Increased width
+    autosize=True,
+    height=500,  # Optimized height
 )
 
 # Show Plotly chart with a unique key
-st.plotly_chart(fig, key="main_plot")
+st.plotly_chart(fig, use_container_width=True)
 
 # Add section for Total Error
 st.markdown("---")
@@ -144,19 +147,19 @@ fig_error.update_layout(
     title="Total Error Bar Chart",
     xaxis_title="Error Value",
     yaxis_title="",
-    height=250,  # Adjusting height for error plot
-    width=900,   # Same width as the main plot for consistency
+    autosize=True,
+    height=300,  # Optimized height
     xaxis=dict(range=[0, max(total_error + 50, total_error * 1.2)])  # Dynamic range
 )
 
 # Show the error plot with a unique key
-st.plotly_chart(fig_error, key="error_plot")
+st.plotly_chart(fig_error, use_container_width=True)
 
 # Tabs for organization
 tab1, tab2 = st.tabs(["📊 Interactive Plot", "📚 About Linear Regression"])
 with tab1:
     st.write("### Interactive Plot Section")
-    st.plotly_chart(fig, key="tab_plot")
+    st.plotly_chart(fig, use_container_width=True)
 
 with tab2:
     st.write("### About Linear Regression")
