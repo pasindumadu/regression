@@ -35,8 +35,6 @@ if "slope" not in st.session_state:
 if "intercept" not in st.session_state:
     st.session_state.intercept = 1.0
 
-# Adjust layout for mobile devices
-is_mobile = st.sidebar.checkbox("Mobile View", value=False)
 
 # Tabs for interactive visualization and theory
 tab1, tab2 = st.tabs(["📊 Interactive Regression", "📚 What is Linear Regression?"])
@@ -134,16 +132,6 @@ with tab1:
         tooltip=["Error Value"]
     ).properties(width=600, height=100)
 
-    # Adjust columns for mobile view
-    if is_mobile:
-        st.altair_chart(error_chart, use_container_width=True)
-        st.write(f"### **{total_error:.2f}**")
-    else:
-        error_col1, error_col2 = st.columns([4, 1])
-        with error_col1:
-            st.altair_chart(error_chart, use_container_width=True)
-        with error_col2:
-            st.write(f"### **{total_error:.2f}**")
 
     # Error Evaluation
     if total_error < 50:
