@@ -1,12 +1,11 @@
+# Importing necessary libraries
 import numpy as np
 import pandas as pd
 import streamlit as st
 import altair as alt
 
 # Page Configuration
-st.set_page_config(
-    layout="wide", page_title="Interactive Linear Regression", page_icon="📈"
-)
+st.set_page_config(layout="wide", page_title="Interactive Linear Regression", page_icon="📈")
 
 # Dark Theme Styling
 custom_css = '''
@@ -43,31 +42,18 @@ with tab1:
     st.title("📈 Interactive Linear Regression App")
     st.subheader("Explore Regression Models and Minimize Error")
 
-    # Introduction Section
-    st.markdown("""
-    This app lets you:
-    - Adjust the slope (**m**) and intercept (**b**) of a regression line.
-    - Visualize your adjusted line and compare it to the optimal best-fit line.
-    - View and minimize the **total error** dynamically.
-    """)
-    st.markdown("---")
-
     # Data Generation
     np.random.seed(42)
     x = np.linspace(0, 10, 50)
     y = 3 * x + 5 + np.random.normal(0, 2, size=x.shape)
 
     # Input Controls for Slope and Intercept
-    st.markdown("### 🔧 Adjust Parameters")
-    col1, col2 = st.columns(2)
+    st.markdown("#### 🔧 Adjust Parameters")
+    col1, col2 = st.columns([1, 1])
     with col1:
-        slope = st.number_input(
-            "Slope (m)", value=st.session_state.slope, step=0.1, min_value=-10.0, max_value=10.0
-        )
+        slope = st.number_input("Slope (m)", value=st.session_state.slope, step=0.1, min_value=-10.0, max_value=10.0)
     with col2:
-        intercept = st.number_input(
-            "Intercept (b)", value=st.session_state.intercept, step=0.1, min_value=-20.0, max_value=20.0
-        )
+        intercept = st.number_input("Intercept (b)", value=st.session_state.intercept, step=0.1, min_value=-20.0, max_value=20.0)
 
     # Update Session State
     st.session_state.slope = slope
@@ -83,7 +69,7 @@ with tab1:
     data = pd.DataFrame({"X": x, "Y": y, "Y_pred": y_pred, "Y_best_fit": y_best_fit})
     scatter = alt.Chart(data).mark_circle(size=70).encode(
         x="X", y="Y", tooltip=["X", "Y"]
-    ).properties(width=800, height=400)
+    ).properties(width=800, height=300)
 
     user_line = alt.Chart(data).mark_line(color="red", strokeWidth=3).encode(
         x="X", y="Y_pred", tooltip=["X", "Y_pred"]
@@ -97,42 +83,32 @@ with tab1:
     chart = chart.properties(
         title="📊 Regression Line Visualization",
     ).configure_title(
-        fontSize=18, anchor="middle", color="lightgreen"
+        fontSize=16, anchor="middle", color="lightgreen"
     )
 
     # Display Main Chart
     st.altair_chart(chart, use_container_width=True)
 
     # Dynamic Horizontal Total Error Bar Chart
-    st.markdown("---")
     st.markdown("### 🔢 Total Error")
-
-    error_data = pd.DataFrame({
-        "Error Type": ["Current Error"],
-        "Error Value": [total_error]
-    })
-    error_chart = alt.Chart(error_data).mark_bar(size=30).encode(
+    error_data = pd.DataFrame({"Error Type": ["Current Error"], "Error Value": [total_error]})
+    error_chart = alt.Chart(error_data).mark_bar(size=20).encode(
         x=alt.X("Error Value", axis=alt.Axis(title="Error Magnitude")),
         y=alt.Y("Error Type", axis=None),
         color=alt.condition(
-            alt.datum["Error Value"] < 200,
+            alt.datum["Error Value"] < 100,
             alt.value("green"),  # Green for low error
             alt.value("red")    # Red for high error
         ),
         tooltip=["Error Value"]
-    ).properties(width=600, height=100)
+    ).properties(width=800, height=60)
 
-    # Adjust columns for mobile view
-    error_col1, error_col2 = st.columns([4, 1])
-    with error_col1:
-        st.altair_chart(error_chart, use_container_width=True)
-    with error_col2:
-        st.write(f"### **{total_error:.2f}**")
+    st.altair_chart(error_chart, use_container_width=True)
 
     # Error Evaluation
     if total_error < 50:
         st.success("Great Fit! 🎉")
-    elif total_error < 200:
+    elif total_error < 100:
         st.warning("Good Fit! Could Improve 🧐")
     else:
         st.error("High Error! 🚨 Try Adjusting.")
@@ -141,7 +117,7 @@ with tab1:
     st.markdown("""
     ---
     <footer style="text-align: center; font-size: 12px; color: gray;">
-        Developed by Pasindu Madhuranga | Powered by Streamlit
+        Developed by [Your Name](https://yourportfolio.com) | Powered by Streamlit
     </footer>
     """, unsafe_allow_html=True)
 
